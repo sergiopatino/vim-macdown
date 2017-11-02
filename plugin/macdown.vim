@@ -26,7 +26,6 @@ set cpo&vim
 
 function! s:MacDownMarkdownPreview()
   let path = expand("%p")
-  " let refresh = "osascript -e 'tell application \"MacDown\" to close window 1' ; open -g -F ".path." -a \"MacDown\""
   let refresh = "osascript -e 'tell application \"MacDown\" \n activate \n tell application \"System Events\" to keystroke \"r\" using {command down} \n end tell \n tell application \"iTerm2\" \n activate \n end tell'"
   call jobstart(["bash", "-c", refresh], {"exit_cb": "MacDownHandleScriptFinished"})
 endfunction
