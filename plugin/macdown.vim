@@ -28,7 +28,7 @@ function! s:MacDownMarkdownPreview()
   let path = expand("%p")
   " let refresh = "osascript -e 'tell application \"MacDown\" to close window 1' ; open -g -F ".path." -a \"MacDown\""
   let refresh = "osascript -e 'tell application \"MacDown\" keystroke \"r\" using {command down}'"
-  call job_start(["bash", "-c", refresh], {"exit_cb": "MacDownHandleScriptFinished"})
+  call jobstart(["bash", "-c", refresh], {"exit_cb": "MacDownHandleScriptFinished"})
 endfunction
 
 function! MacDownHandleScriptFinished(job, status)
@@ -36,7 +36,6 @@ function! MacDownHandleScriptFinished(job, status)
     call s:EchoSuccess("MacDown refreshed ♻️ ")
   else
     echo 'MacDown is not installed!'
-    finish
   endif
 endfunction
 
@@ -51,6 +50,8 @@ endfunction
 function! s:EchoProgress(msg)
   redraw | echohl Identifier | echom "vim-macdown: " . a:msg | echohl None
 endfunction
+
+nnoremap <leader>p :call <SID>MacDownMarkdownPreview()<cr>
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
