@@ -26,7 +26,8 @@ set cpo&vim
 
 function! s:MacDownMarkdownPreview()
   let path = expand("%p")
-  let refresh = "osascript -e 'tell application \"MacDown\" to close window 1' ; open -g -F ".path." -a \"MacDown\""
+  " let refresh = "osascript -e 'tell application \"MacDown\" to close window 1' ; open -g -F ".path." -a \"MacDown\""
+  let refresh = "osascript -e 'tell application \"MacDown\" \n keystroke \"r\" using {command down}'"
   call job_start(["bash", "-c", refresh], {"exit_cb": "MacDownHandleScriptFinished"})
 endfunction
 
@@ -34,7 +35,8 @@ function! MacDownHandleScriptFinished(job, status)
   if a:status == 0
     call s:EchoSuccess("MacDown refreshed ♻️ ")
   else
-    call s:EchoError("[FAIL] Run :InstallMacDown to download MacDown")
+    echo 'MacDown is not installed!'
+    finish
   endif
 endfunction
 
@@ -49,36 +51,6 @@ endfunction
 function! s:EchoProgress(msg)
   redraw | echohl Identifier | echom "vim-macdown: " . a:msg | echohl None
 endfunction
-
-function! s:InstallMacDown()
-  call s:EchoProgress("MacDown is downloading ⏳ ")
-  let tmpdir   = "~/.md-tmp"
-  let zipfile  = tmpdir."/macdown.zip"
-
-  let mkdir    = "mkdir -p ".tmpdir." && "
-  let download = "curl -L https://github.com/MacDownApp/macdown/releases/download/v0.7.1/MacDown.app.zip -o ".zipfile." && "
-  let unzip    = "unzip -o ".zipfile." -d ".tmpdir." >> /dev/null 2>&1"." && "
-  let cleanup  = "rm -f ".zipfile." && "
-  let link     = "ln -Ffs /Applications ".tmpdir."/Applications"." && "
-  let install  = "open ".tmpdir
-
-
-  let full_command = mkdir.download.unzip.cleanup.link.install
-  call job_start(["bash", "-c", full_command], {"exit_cb": "MacDownHandleDownloadFinished"})
-endfunction
-
-function! MacDownHandleDownloadFinished(job, status)
-  if a:status == 0
-    call s:EchoSuccess("MacDown downloaded ✅  ")
-  else
-    call s:EchoError("[FAIL] MacDown could not be downloaded. ".a:job)
-  endif
-endfunction
-
-command InstallMacDown :execute s:InstallMacDown()
-
-nnoremap <leader>p :call <SID>MacDownMarkdownPreview()<cr>
-
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
